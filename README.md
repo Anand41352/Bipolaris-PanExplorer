@@ -298,14 +298,16 @@ This repository is distributed under the **MIT License**.
 
 # Contact
 
-**Anand Kumar Shukla**
+# Contact
 
-CSIR–National Chemical Laboratory
+**Anand Kumar Shukla**  
+Biochemical Sciences Division, CSIR–National Chemical Laboratory (CSIR-NCL)  
+Pune 411008, Maharashtra, India  
+Email: **anand.shukla7066@gmail.com**
 
-Pune, India
+**Corresponding Author**
 
-**Corresponding author**
-
-Dr. Narendra Kadoo
-
+**Dr. Narendra Kadoo**  
+Biochemical Sciences Division, CSIR–National Chemical Laboratory (CSIR-NCL)  
+Academy of Scientific and Innovative Research (AcSIR)  
 Email: **ny.kadoo.ncl@csir.res.in**
