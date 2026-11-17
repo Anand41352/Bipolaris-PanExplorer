@@ -1,0 +1,2458 @@
+Table S1: Summary of the Bipolaris sorokiniana genomes used for pangenome construction
+
+Strain	Country 	Isolation source	Host	Location	Assembly level	Publication year	Sequencing technology	NCBI accession no./ NCBI BioProject ID	WGS accession no.	Size (Mb)	Submitter/Source
+BRIP10943a	Australia	Mycelia and spores	Wheat	Biloela, QLD, Australia	Chromosome	2019	PacBio RSII	GCA_008452735.1	SRZH01	36.92	Australian National University, Canberra, Australia
+BRIP27492a	Australia	Mycelia and spores	Barley	Esperance, Western Australia, Australia	Chromosome	2019	Oxford Nanopore MinION	GCA_008452725.1	SRZG01	35.24	Australian National University, Canberra, Australia
+BS112	India	Leaves	Wheat	Banaras, Varanasi, India	Contig	2019	Illumina, Oxford Nanopore, Ion Torrent	GCA_004329375.1	RCTM01	37.38	ICAR-Indian Agricultural Research Institute, New Delhi, India
+BS52	India	Leaves	Wheat	Shillongani, Assam, India	contig	2022	Illumina HiSeq 1000 platform	PRJNA785882	N.A.	34.41	10.3390/pathogens12010001
+D2 	India	Leaves	Wheat	Pusa, Bihar, India	contig	2022	Illumina HiSeq 1000 platform	PRJNA785882	N.A.	39.07	10.3390/pathogens12010001
+LK93	China	Mycelia	Wheat	Lankao, China	Chromosome	2022	Oxford Nanopore PromethION	GCA_024722535.1	N.A.	36.23	Huazhong Agricultural University, Wuhan, China
+ND90Pr	USA	Leaves	Barley	North Dakota, United States	Scaffold	2013	Sanger, 454, Illumina	GCA_000338995.1	AEIN01	34.41	Joint Genome Institute, Berkeley, USA
+ND93-1	USA	Kernels	Barley	North Dakota, Walsh County, USA	Chromosome	2023	PacBio	GCA_033006315.1	JASPLA01	36.48	North Dakota State University, Fargo, USA
+Shoemaker	China	Leaves	Wheat	Gansu, China	Scaffold	2020	Illumina HiSeq	GCA_013416765.1	WNKQ01	34.33	Gansu Agricultural University, Lanzhou, China
+SI	India	Leaves	Wheat	Dharwad, Karnataka, India	contig	2022	Illumina HiSeq 1000 platform	PRJNA785882	N.A.	33.91	10.3390/pathogens12010001
+WAI2411	Australia	N.A.	Wheat	Nyngan, NSW, Australia	Chromosome	2025	Oxford Nanopore MinION	PRJNA1017791	N.A.	36.33	Australian National University, Canberra, Australia
+WAI2431	Australia	N.A.	Wheat	Gilgandra, NSW, Australia	Chromosome	2025	Oxford Nanopore MinION	PRJNA1017791	N.A.	36.34	Australian National University, Canberra, Australia
+WAI2432	Australia	N.A.	Wheat	North Star, NSW, Australia	Chromosome	2025	Oxford Nanopore MinION	PRJNA1017791	N.A.	36.77	Australian National University, Canberra, Australia
+WAI3285	Australia	N.A.	Wheat	Inglestone, QLD, Australia	Chromosome	2025	Oxford Nanopore MinION	PRJNA1017791	N.A.	36.2	Australian National University, Canberra, Australia
+WAI3295	Australia	N.A.	Wheat	Moonie, QLD, Australia	Chromosome	2025	Oxford Nanopore MinION	PRJNA1017791	N.A.	36.59	Australian National University, Canberra, Australia
+WAI3382	Australia	N.A.	Wheat	Pallamallawa, NSW, Australia	Chromosome	2025	Oxford Nanopore MinION	PRJNA1017791	N.A.	36.68	Australian National University, Canberra, Australia
+WAI3384	Australia	N.A.	Wheat	Mungindi, QLD, Australia	Chromosome	2025	Oxford Nanopore MinION	PRJNA1017791	N.A.	36.77	Australian National University, Canberra, Australia
+WAI3398	Australia	N.A.	Wheat	Walgett, NSW, Australia	Chromosome	2025	Oxford Nanopore MinION	PRJNA1017791	N.A.	36.6	Australian National University, Canberra, Australia
+Yt-6	China	leaves	Avena nuda (naked oat)	Zhangjiakou, Hebei, China	contig	2024	Oxford Nanopore	GCA_037974985.1	JBBEUP01	38.2	Hebei Agricultural University, China
+
+
+
+1. SPAdes genome assembly (Done for D2, SI, BS52)
+Software: SPAdes v4.2.0
+Mode: Isolate
+Threads: 8
+Maximum memory: 64 GB
+Input: Paired-end Illumina reads
+Output: Assembled genome FASTA
+
+Example for DNA_2:
+spades.py \
+  -1 D2_R1.fastq \
+  -2 D2_R2.fastq \
+  -o D2_spades_output \
+  --isolate \
+  -t 8 \
+  -m 64
+
+Parameters:
+- -1: Forward paired-end reads.
+- -2: Reverse paired-end reads.
+- -o: Output directory.
+- --isolate: Isolate assembly mode.
+- -t 8: Use 8 CPU threads.
+- -m 64: Maximum memory of 64 GB.
+
+
+2. Contig filtering using SeqKit
+Software: SeqKit
+Purpose: Remove contigs shorter than 500 bp and remove gap characters.
+seqkit seq -m 500 -g genome.fasta > genome.clean.genome.fasta
+
+Parameters:
+- -m 500: Minimum sequence length of 500 bp.
+- -g: Remove gap characters from sequences.
+- >: Save the filtered sequences to a new FASTA file.
+
+
+3. Genome assembly assessment using QUAST
+Software: QUAST v5.3.0
+Input: 19 genome FASTA files.
+quast genome.fasta -o quast_results
+
+
+
+4. Genome completeness assessment using BUSCO
+Software: BUSCO v6.0.0
+Mode: Genome
+Lineage dataset: dothideomycetes_odb10
+Threads: 16
+busco \
+  -i genome.fasta \
+  -m genome \
+  -l dothideomycetes_odb10 \
+  -c 16 \
+  -o genome_BUSCO
+
+Parameters:
+- -i: Input genome FASTA file.
+- -m genome: Genome assessment mode.
+- -l dothideomycetes_odb10: Dothideomycetes BUSCO lineage dataset.
+- -c 16: Use 16 CPU threads.
+- -o: Output directory name.
+
+
+
+5. Repeat identification and masking
+
+A hybrid approach was used, combining homology-based repeat masking and de novo repeat discovery.
+
+5.1 Homology-based repeat masking
+
+Software: RepeatMasker v4.1.9
+Repeat database: Dfam v3.9
+Repeat category: Fungi
+Output format: GFF
+Parallel processes per genome: 4
+
+Command for one genome
+
+mkdir -p repeatmasker_results/STRAIN_NAME
+
+RepeatMasker \
+  -species fungi \
+  -pa 4 \
+  -gff \
+  -dir repeatmasker_results/STRAIN_NAME \
+  STRAIN_NAME.genome.fasta
+
+Command for all 19 genomes
+
+mkdir -p repeatmasker_results
+
+for genome in *.genome.fasta
+do
+    strain=$(basename "$genome" .genome.fasta)
+
+    mkdir -p "repeatmasker_results/$strain"
+
+    RepeatMasker \
+        -species fungi \
+        -pa 4 \
+        -gff \
+        -dir "repeatmasker_results/$strain" \
+        "$genome"
+done
+
+Parameters:
+- -species fungi: Uses the fungal repeat library.
+- -pa 4: Uses four parallel processes per genome.
+- -gff: Generates GFF annotation output.
+- -dir: Specifies the output directory.
+- *.genome.fasta: Processes all genome FASTA files matching this naming pattern.
+
+Note: The loop above processes genomes one after another, with four parallel processes within each RepeatMasker run. It does not run all 19 genomes simultaneously.
+
+5.2 De novo repeat library construction using RepeatModeler
+
+Software: RepeatModeler v2.0.7
+Purpose: Identify novel and strain-specific repetitive elements and construct genome-specific repeat libraries.
+Threads: 20
+
+Activate the environment:
+conda activate repeatmodeler_env
+
+Step 1: Build the RepeatModeler database
+BuildDatabase \
+  -name STRAIN_NAME \
+  STRAIN_NAME.genome.fasta
+
+Step 2: Identify repetitive elements
+RepeatModeler \
+  -database STRAIN_NAME \
+  -threads 20
+
+Parameters:
+- -name: Name assigned to the RepeatModeler database.
+- STRAIN_NAME.genome.fasta: Input genome FASTA.
+- -database: RepeatModeler database generated by BuildDatabase.
+- -threads 20: Uses 20 CPU threads.
+Output: A genome-specific repeat library, generally named:
+consensi.fa.classified
+
+Rename it for the corresponding strain:
+cp RM_*/consensi.fa.classified STRAIN_NAME_custom_lib.fa
+
+Run this procedure separately for each strain, keeping its database and output files in a separate directory.
+5.3 Second-round RepeatMasker using custom repeat libraries
+The custom libraries generated by RepeatModeler were used for a second round of masking.
+
+Software: RepeatMasker v4.1.9
+Library: Strain-specific RepeatModeler library
+Engine: RMBlast
+Parallel processes: 16
+Command
+mkdir -p repeatmasker_denovo/STRAIN_NAME
+
+RepeatMasker \
+  -lib STRAIN_NAME_custom_lib.fa \
+  -engine rmblast \
+  -pa 16 \
+  -gff \
+  -dir repeatmasker_denovo/STRAIN_NAME \
+  repeatmasker_results/STRAIN_NAME/STRAIN_NAME.genome.fasta.masked
+
+Parameters:
+- -lib: Custom repeat library generated by RepeatModeler.
+- -engine rmblast: Uses RMBlast as the search engine.
+- -pa 16: Uses 16 parallel processes.
+- -gff: Generates GFF annotation output.
+- -dir: Specifies the output directory.
+- Input FASTA: Homology-based masked genome from the first RepeatMasker run.
+Important: Check the actual output filename from your first RepeatMasker run before using it as the second-round input. RepeatMasker normally appends .masked to the input filename.
+
+
+
+
+6. Gene prediction and annotation
+
+Gene prediction and annotation were performed using MAKER v3.1.4, integrating transcriptomic evidence, protein homology evidence and *ab initio* gene prediction.
+
+## 6.1 Transcriptome data preparation
+
+A total of 14 RNA-seq datasets were used: 12 datasets from the *B. sorokiniana* D2 strain and two datasets from the LK93 strain.
+
+### A. D2 transcriptome data
+
+The propiconazole/azole-stressed *B. sorokiniana* transcriptome dataset was obtained from NCBI SRA under BioProject **PRJNA417354**.
+
+Study: Transcriptome sequencing of azole-stressed *Bipolaris sorokiniana*.
+
+NCBI BioProject: `PRJNA417354`
+
+The D2 transcriptome datasets were subjected to quality control, adapter trimming and transcriptome assembly.
+
+### B. LK93 transcriptome data
+
+Two RNA-seq datasets corresponding to wild-type mycelia of *B. sorokiniana* LK93 were retrieved from NCBI SRA.
+
+BioProject accession supplied for these datasets: `PRJNA743515`
+
+SRA run accessions:
+
+```bash
+prefetch SRR15044366
+prefetch SRR15044367
+```
+
+Convert SRA files into FASTQ format:
+
+```bash
+fasterq-dump SRR15044366 --split-files
+fasterq-dump SRR15044367 --split-files
+```
+
+### C. Quality control and adapter trimming
+
+**Software:** FastQC v0.12.1
+
+```bash
+fastqc *.fastq -o fastqc_results
+```
+
+Adapter trimming was performed using Trim Galore.
+
+For paired-end reads:
+
+```bash
+trim_galore --paired SAMPLE_R1.fastq SAMPLE_R2.fastq
+```
+
+For single-end reads:
+
+```bash
+trim_galore SAMPLE.fastq
+```
+
+### D. Combining trimmed RNA-seq reads
+
+For D2:
+
+```bash
+cat *_trimmed.fq > D2_all_trimmed.fq
+```
+
+For LK93, the original workflow used:
+
+```bash
+cat *val_1.fq *val_2.fq > LK93_all_trimmed.fq
+```
+
+**Note:** These concatenation commands and the subsequent `-s` rnaSPAdes input are appropriate only if the reads were intended to be treated as single-end. If the files are paired-end reads, their pairing should be preserved. The original read layout and assembly logs should be checked before publishing this part as the exact executed procedure.
+
+### E. De novo transcriptome assembly
+
+**Software:** rnaSPAdes v3.15.5
+**Threads:** 16
+
+For D2:
+
+```bash
+rnaspades.py \
+  -s D2_all_trimmed.fq \
+  -o rnaspades_D2 \
+  --threads 16
+```
+
+For LK93:
+
+```bash
+rnaspades.py \
+  -s LK93_all_trimmed.fq \
+  -o rnaspades_LK93 \
+  --threads 16
+```
+
+Parameters:
+- `-s`: Input single-end reads.
+- `-o`: Output directory.
+- `--threads 16`: Number of CPU threads.
+
+Output files:
+
+```text
+rnaspades_D2/transcripts.fasta
+rnaspades_LK93/transcripts.fasta
+```
+
+## 6.2 Transcript selection using EvidentialGene
+
+The D2 and LK93 transcript assemblies were combined and processed using EvidentialGene to reduce redundancy and select representative transcripts.
+
+**Software:** EvidentialGene tr2aacds.pl
+**Version:** 2022.04.05
+
+### Command
+
+```bash
+tr2aacds.pl \
+  -NCPU=30 \
+  -MAXMEM=60000 \
+  -MINAA=50 \
+  -cdnaseq combined_transcripts.fasta \
+  -logfile evigene_run.log
+```
+
+Parameters:
+- `-NCPU=30`: Uses 30 CPU threads.
+- `-MAXMEM=60000`: Maximum memory setting of 60,000 MB.
+- `-MINAA=50`: Minimum predicted protein length of 50 amino acids.
+- `-cdnaseq`: Input combined transcript FASTA file.
+- `-logfile`: Records the EvidentialGene execution log.
+
+**Input:**
+
+```text
+combined_transcripts.fasta
+```
+
+This file contains the combined D2 and LK93 transcript assemblies.
+
+**Output:** EvidentialGene-generated transcript and coding-sequence files, including the selected representative transcript set.
+
+The exact final EvidentialGene output filenames should be taken from the completed run directory.
+
+## 6.3 Protein homology evidence preparation
+
+Protein homology evidence was retrieved from NCBI RefSeq for five closely related species:
+
+- *Bipolaris maydis*
+- *Bipolaris oryzae*
+- *Bipolaris zeicola*
+- *Bipolaris victoriae*
+- *Bipolaris sorokiniana*
+
+The downloaded protein FASTA files were combined into a single protein evidence file.
+
+```bash
+cat *.faa > combined_proteins.fasta
+```
+
+Output:
+
+```text
+combined_proteins.fasta
+```
+
+## 6.4 Initial MAKER annotation (Run 1)
+
+**Software:** MAKER v3.1.4
+
+### A. Create working directory and configuration files
+
+```bash
+mkdir -p maker_run1
+cd maker_run1
+
+maker -CTL
+```
+
+This generates:
+
+```text
+maker_opts.ctl
+maker_bopts.ctl
+maker_exe.ctl
+```
+
+### B. Configure maker_opts.ctl
+
+```bash
+nano maker_opts.ctl
+```
+
+Relevant settings:
+
+```ini
+# Genome
+genome=/full/path/to/STRAIN_NAME.genome.fasta
+organism_type=eukaryotic
+
+# Transcript evidence
+est=/full/path/to/representative_transcripts.fasta
+
+# Protein homology evidence
+protein=/full/path/to/combined_proteins.fasta
+
+# Repeat masking
+model_org=
+rmlib=
+repeat_protein=
+rm_gff=
+softmask=1
+
+# Ab initio prediction
+snaphmm=
+augustus_species=
+
+# Evidence-based prediction
+est2genome=1
+protein2genome=1
+
+# Other parameters
+cpus=14
+TMP=/path/to/custom/tmp
+```
+
+Parameters:
+- `genome`: Repeat-masked genome FASTA.
+- `est`: Representative transcript FASTA generated using EvidentialGene.
+- `protein`: Combined protein homology evidence.
+- `softmask=1`: Indicates that the input genome is soft-masked.
+- `snaphmm`: Left blank during the initial run.
+- `augustus_species`: Left blank during the initial run.
+- `est2genome=1`: Enables EST-to-genome prediction.
+- `protein2genome=1`: Enables protein-to-genome prediction.
+- `cpus=14`: Uses 14 CPU threads.
+- `TMP`: Temporary working directory.
+
+### C. Execute MAKER Run 1
+
+```bash
+nohup maker > maker.log 2>&1 &
+```
+
+Monitor:
+
+```bash
+tail -f maker.log
+```
+
+## 6.5 Merge MAKER Run 1 outputs
+
+### A. Merge GFF3 annotation
+
+```bash
+gff3_merge \
+  -d STRAIN_NAME_master_datastore_index.log \
+  -o STRAIN_NAME_run1.all.gff
+```
+
+### B. Merge transcript sequences
+
+```bash
+find STRAIN_NAME_datastore/ \
+  -type f \
+  -name "*.maker.transcripts.fasta" \
+  -exec cat {} + \
+  > STRAIN_NAME_run1.all.transcripts.fasta
+```
+
+### C. Merge protein sequences
+
+```bash
+find STRAIN_NAME_datastore/ \
+  -type f \
+  -name "*.maker.proteins.fasta" \
+  -exec cat {} + \
+  > STRAIN_NAME_run1.all.proteins.fasta
+```
+
+### D. Merge non-coding RNA sequences
+
+```bash
+find STRAIN_NAME_datastore/ \
+  -type f \
+  -name "*.maker.noncoding.fasta" \
+  -exec cat {} + \
+  > STRAIN_NAME_run1.all.noncoding.fasta
+```
+
+### E. Merge tRNA sequences
+
+```bash
+find STRAIN_NAME_datastore/ \
+  -type f \
+  -name "*.maker.trnascan.noncoding.fasta" \
+  -exec cat {} + \
+  > STRAIN_NAME_run1.all.trnas.fasta
+```
+
+### F. Extract CDS sequences
+
+```bash
+gffread STRAIN_NAME_run1.all.gff \
+  -g STRAIN_NAME.genome.fasta \
+  -x STRAIN_NAME_run1.all.cds.fasta
+```
+
+Parameters:
+- `-g`: Genome FASTA.
+- `-x`: Output CDS FASTA.
+
+## 6.6 SNAP training – First round
+
+**Software:** SNAP (2006-07-28)
+
+High-confidence gene models were selected using an AED threshold of 0.25.
+
+### A. Extract training gene models
+
+```bash
+maker2zff -x 0.25 STRAIN_NAME_run1.all.gff
+```
+
+Output:
+
+```text
+genome.ann
+genome.dna
+```
+
+### B. Categorize training sequences
+
+```bash
+fathom genome.ann genome.dna -categorize 1000
+```
+
+### C. Export training sequences
+
+```bash
+fathom uni.ann uni.dna -export 1000 -plus
+```
+
+### D. Build SNAP model
+
+```bash
+forge export.ann export.dna
+```
+
+```bash
+hmm-assembler.pl STRAIN_NAME_snap_model . \
+  > STRAIN_NAME_snap_model.hmm
+```
+
+Final SNAP model:
+
+```text
+STRAIN_NAME_snap_model.hmm
+```
+
+## 6.7 AUGUSTUS training – First round
+
+**Software:** AUGUSTUS v3.5.0
+
+### A. Create species model
+
+```bash
+perl /path/to/Augustus/scripts/new_species.pl \
+  --species=STRAIN_NAME
+```
+
+### B. Convert SNAP training files to GenBank format
+
+```bash
+perl /path/to/maker/bin/zff2genbank.pl \
+  export.ann export.dna \
+  > STRAIN_NAME_run1.gb
+```
+
+### C. Train AUGUSTUS
+
+```bash
+etraining \
+  --species=STRAIN_NAME \
+  STRAIN_NAME_run1.gb
+```
+
+### D. Optimize AUGUSTUS model
+
+```bash
+nohup perl /path/to/Augustus/scripts/optimize_augustus.pl \
+  --species=STRAIN_NAME \
+  STRAIN_NAME_run1.gb \
+  --cpus=16 \
+  --kfold=16 \
+  > augustus_optimize_run1.log 2>&1 &
+```
+
+Monitor:
+
+```bash
+tail -f augustus_optimize_run1.log
+```
+
+Parameters:
+- `--species`: AUGUSTUS species model.
+- `--cpus=16`: Uses 16 CPU threads.
+- `--kfold=16`: 16-fold cross-validation.
+
+## 6.8 Second MAKER annotation (Run 2)
+
+The trained SNAP and AUGUSTUS models were incorporated into the second MAKER run.
+
+```bash
+mkdir -p maker_run2
+cp maker_run1/maker_*.ctl maker_run2/
+
+cd maker_run2
+nano maker_opts.ctl
+```
+
+Update the following settings:
+
+```ini
+# Genome
+genome=/full/path/to/STRAIN_NAME.genome.fasta
+organism_type=eukaryotic
+
+# Evidence
+est=/full/path/to/representative_transcripts.fasta
+protein=/full/path/to/combined_proteins.fasta
+
+# Repeat masking
+softmask=1
+
+# Ab initio prediction
+snaphmm=/full/path/to/STRAIN_NAME_snap_model.hmm
+augustus_species=STRAIN_NAME
+
+# Other parameters
+keep_preds=1
+cpus=14
+TMP=/path/to/custom/tmp
+```
+
+Execute MAKER Run 2:
+
+```bash
+nohup maker > maker.log 2>&1 &
+```
+
+Monitor:
+
+```bash
+tail -f maker.log
+```
+
+After completion, merge the annotation:
+
+```bash
+gff3_merge \
+  -d STRAIN_NAME_master_datastore_index.log \
+  -o STRAIN_NAME_run2.all.gff
+```
+
+Extract high-confidence models for the second training round:
+
+```bash
+maker2zff -x 0.25 STRAIN_NAME_run2.all.gff
+```
+
+## 6.9 SNAP and AUGUSTUS training – Second round
+
+### A. SNAP training
+
+Using the updated `genome.ann` and `genome.dna` files from Run 2:
+
+```bash
+fathom genome.ann genome.dna -categorize 1000
+
+fathom uni.ann uni.dna -export 1000 -plus
+
+forge export.ann export.dna
+```
+
+Generate the updated SNAP model:
+
+```bash
+hmm-assembler.pl STRAIN_NAME_snap_model_run2 . \
+  > STRAIN_NAME_snap_model_run2.hmm
+```
+
+### B. AUGUSTUS training
+
+Back up the existing species model:
+
+```bash
+cp -r "$AUGUSTUS_CONFIG_PATH/species/STRAIN_NAME" \
+      "$AUGUSTUS_CONFIG_PATH/species/STRAIN_NAME_backup"
+```
+
+Convert the second-round training files:
+
+```bash
+perl /path/to/maker/bin/zff2genbank.pl \
+  export.ann export.dna \
+  > STRAIN_NAME_run2.gb
+```
+
+Train AUGUSTUS:
+
+```bash
+etraining \
+  --species=STRAIN_NAME \
+  STRAIN_NAME_run2.gb
+```
+
+Optimize the updated model:
+
+```bash
+nohup perl /path/to/Augustus/scripts/optimize_augustus.pl \
+  --species=STRAIN_NAME \
+  STRAIN_NAME_run2.gb \
+  --cpus=16 \
+  --kfold=16 \
+  > augustus_optimize_run2.log 2>&1 &
+```
+
+Monitor:
+
+```bash
+tail -f augustus_optimize_run2.log
+```
+
+## 6.10 Final MAKER annotation (Run 3)
+
+The updated SNAP and AUGUSTUS models were incorporated into the final MAKER run.
+
+```bash
+mkdir -p maker_run3
+cp maker_run2/maker_*.ctl maker_run3/
+
+cd maker_run3
+nano maker_opts.ctl
+```
+
+Update the predictor paths:
+
+```ini
+# Genome
+genome=/full/path/to/STRAIN_NAME.genome.fasta
+organism_type=eukaryotic
+
+# Evidence
+est=/full/path/to/representative_transcripts.fasta
+protein=/full/path/to/combined_proteins.fasta
+
+# Repeat masking
+softmask=1
+
+# Updated ab initio predictors
+snaphmm=/full/path/to/STRAIN_NAME_snap_model_run2.hmm
+augustus_species=STRAIN_NAME
+
+# Other parameters
+keep_preds=1
+cpus=14
+TMP=/path/to/custom/tmp
+```
+
+Execute MAKER Run 3:
+
+```bash
+nohup maker > maker.log 2>&1 &
+```
+
+Monitor:
+
+```bash
+tail -f maker.log
+```
+
+## 6.11 Final annotation merging and sequence extraction
+
+### A. Merge final GFF3 annotation
+
+```bash
+gff3_merge \
+  -d STRAIN_NAME_master_datastore_index.log \
+  -o STRAIN_NAME.all.gff
+```
+
+### B. Merge final transcripts
+
+```bash
+find STRAIN_NAME_datastore/ \
+  -type f \
+  -name "*.maker.transcripts.fasta" \
+  -exec cat {} + \
+  > STRAIN_NAME.all.transcripts.fasta
+```
+
+### C. Merge final proteins
+
+```bash
+find STRAIN_NAME_datastore/ \
+  -type f \
+  -name "*.maker.proteins.fasta" \
+  -exec cat {} + \
+  > STRAIN_NAME.all.proteins.fasta
+```
+
+### D. Extract CDS sequences
+
+```bash
+gffread STRAIN_NAME.all.gff \
+  -g STRAIN_NAME.genome.fasta \
+  -x STRAIN_NAME.all.cds.fasta
+```
+
+### E. Extract non-coding RNA and tRNA sequences
+
+```bash
+find STRAIN_NAME_datastore/ \
+  -type f \
+  -name "*.maker.noncoding.fasta" \
+  -exec cat {} + \
+  > STRAIN_NAME.all.noncoding.fasta
+```
+
+```bash
+find STRAIN_NAME_datastore/ \
+  -type f \
+  -name "*.maker.trnascan.noncoding.fasta" \
+  -exec cat {} + \
+  > STRAIN_NAME.all.trnas.fasta
+```
+
+Final annotation outputs:
+
+```text
+STRAIN_NAME.all.gff
+STRAIN_NAME.all.transcripts.fasta
+STRAIN_NAME.all.proteins.fasta
+STRAIN_NAME.all.cds.fasta
+STRAIN_NAME.all.noncoding.fasta
+STRAIN_NAME.all.trnas.fasta
+```
+
+## 6.12 Protein FASTA tagging by prediction source
+
+For downstream comparison and clustering, protein sequences from different prediction sources were tagged according to their origin.
+
+### SNAP proteins
+
+```bash
+sed 's/^>/>snap_/' \
+  STRAIN_NAME_snap.all.proteins.fasta \
+  > snap_tagged.fasta
+```
+
+### AUGUSTUS proteins
+
+```bash
+sed 's/^>/>aug_/' \
+  STRAIN_NAME_augustus.all.proteins.fasta \
+  > augustus_tagged.fasta
+```
+
+### Evidence-supported MAKER proteins
+
+```bash
+sed 's/^>/>evid_/' \
+  STRAIN_NAME_evid.all.proteins.fasta \
+  > evid_tagged.fasta
+```
+
+### NCBI protein sequences
+
+```bash
+sed 's/^>/>ncbi_/' \
+  proteins.faa \
+  > ncbi_tagged.fasta
+```
+
+Combine the prediction-source protein FASTA files:
+
+```bash
+cat snap_tagged.fasta \
+    augustus_tagged.fasta \
+    evid_tagged.fasta \
+    > combined.proteins.fasta
+```
+
+## Software and parameter summary
+
+| Step | Software | Version | Parameters |
+|---|---|---|---|
+| RNA-seq quality control | FastQC | 0.12.1 | Default settings |
+| Adapter trimming | Trim Galore | To be confirmed | Paired-end/single-end according to read layout |
+| Transcriptome assembly | rnaSPAdes | 3.15.5 | `--threads 16` |
+| Transcript selection | EvidentialGene | 2022.04.05 | `-NCPU=30 -MAXMEM=60000 -MINAA=50` |
+| Gene prediction and annotation | MAKER | 3.1.4 | `cpus=14`; evidence-based and *ab initio* prediction |
+| SNAP | SNAP | 2006-07-28 | `fathom -categorize 1000`; `fathom -export 1000 -plus` |
+| AUGUSTUS | AUGUSTUS | 3.5.0 | `--cpus=16`; `--kfold=16` |
+| High-confidence gene selection | MAKER utilities | 3.1.4 | `maker2zff -x 0.25` |
+| GFF3 merging | MAKER utilities | 3.1.4 | `gff3_merge -d` |
+| CDS extraction | gffread | To be confirmed | `-g` genome FASTA; `-x` CDS output |
+
+
+
+
+7. Orthology-based pangenome construction
+
+7.1 Orthogroup inference using OrthoFinder
+Software: OrthoFinder v2.5.5
+Similarity search: DIAMOND v2.1.13.167
+Clustering: MCL
+Multiple sequence alignment: MAFFT
+Phylogenetic inference: FastTree
+Number of genomes: 19
+
+
+
+
+orthofinder \
+  -f INPUT_FILE_TO_BE_USED_FOR_GENE_BASED_PANGGENOME \
+  -t 50 \
+  -a 32 \
+  -S diamond \
+  -M msa \
+  -A mafft \
+  -T fasttree \
+  -n BS19_v1_fastree_FINAL
+
+| Parameter | Value | Description |
+|---|---:|---|
+| `-f` | Input directory | Directory containing the 19 protein FASTA files |
+| `-t` | 50 | Number of threads for the main analysis |
+| `-a` | 32 | Number of threads for sequence analysis |
+| `-S` | diamond | DIAMOND for sequence similarity searches |
+| `-M` | msa | MSA-based orthogroup inference |
+| `-A` | mafft | MAFFT for multiple sequence alignment |
+| `-T` | fasttree | FastTree for gene-tree inference |
+| `-n` | BS19_v1_fastree_FINAL | Name of the OrthoFinder results directory |
+
+
+Output
+The main results were generated in:
+OrthoFinder/Results_BS19_v1_fastree_FINAL/
+
+Important output files and directories used in downstream analyses:
+Orthogroups/
+    Orthogroups.tsv
+    Orthogroups.GeneCount.tsv
+    Orthogroups_UnassignedGenes.tsv
+
+Orthogroup_Sequences/
+
+Species_Tree/
+    SpeciesTree_rooted_node_labels.txt
+
+
+
+7.2 Pangenome partitioning
+
+Orthogroups were classified according to their distribution across the 19 genomes:
+
+Category	Number of genomes containing the orthogroup
+Core	19
+Soft-core	17–18
+Shell	2–16
+Cloud	1
+
+
+7.3 Pangenome growth and core-genome modelling
+
+Pangenome expansion and core-genome conservation were evaluated using 200 random genome permutations.
+
+For each permutation:
+- The cumulative number of orthogroups was calculated as genomes were added.
+- The number of orthogroups shared by all sampled genomes was calculated.
+- Mean values and 95% confidence intervals were used to summarize the results.
+- Pangenome expansion was modelled using a Heaps' law power function.
+- Core-genome reduction was modelled using an exponential decay function.
+
+
+7.4 R script for pangenome visualization and analysis
+
+BS19_orthofinder_pangenome_analysis.R
+
+
+
+8. Sequence-based functional annotation
+
+8.1 Overview
+The longest representative protein sequence from each orthogroup was selected for downstream functional annotation. Annotation was performed separately for the core, soft-core, shell, and cloud orthogroup categories.
+
+The workflow combined:
+1. eggNOG-mapper web-server annotation;
+2. DIAMOND searches against the NCBI clustered non-redundant (NR) protein database;
+3. protein-domain and conserved-motif annotation using InterProScan;
+4. DIAMOND searches against the UniProt Swiss-Prot database; and
+5. DeepFRI-based Gene Ontology (GO) predictions.
+
+Use consistent input names for the category-specific FASTA files, for example:
+
+core_longest.fasta
+softcore_longest.fasta
+shell_longest.fasta
+cloud_longest.fasta
+
+The commands below use protein.fasta as a generic example input. Replace it with the relevant category-specific file when running each analysis.
+
+8.2 eggNOG-mapper functional annotation
+
+Functional annotation was initially performed using the eggNOG-mapper web server (v2.1.13). The longest representative protein sequences were submitted separately for the core, soft-core, shell, and cloud orthogroup categories. DIAMOND-based searches were performed using the fast-sensitivity setting.
+
+Reproducibility information available from the supplied record
+Parameter	Recorded setting
+Tool	eggNOG-mapper web server
+Version	2.1.13
+Input	Longest representative protein sequences, submitted by pangenome category
+Search method	DIAMOND
+Sensitivity	Fast
+Output	Functional annotations assigned by eggNOG-mapper
+
+
+Note: The web-server submission was done in default mode.
+
+8.3 NCBI clustered NR database preparation and DIAMOND searches
+
+8.3.1 Software and database details
+
+The NCBI clustered NR database was downloaded on 7 November 2025. The database was composed of 50 archive volumes (nr_cluster_seq.00.tar.gz to nr_cluster_seq.49.tar.gz). After extraction, the database was inspected using blastdbcmd.
+
+Parameter	Recorded information
+Database	NCBI clustered non-redundant (NR) protein database
+Download source	NCBI BLAST database FTP, experimental directory
+Download date	7 November 2025
+Database date reported by blastdbcmd	26 September 2025
+Number of sequences	465,517,121
+Total residues	148,632,845,539
+BLAST database format	Version 5
+BLAST+ version checked	2.17.0+
+DIAMOND version	2.1.13.167
+Query set	Longest representative protein sequences from orthogroups
+Search mode	DIAMOND BLASTP
+E-value threshold	1 × 10⁻⁵
+Maximum target sequences	5 per database volume
+Threads	48
+
+
+8.3.2 Downloading the database volumes
+
+mkdir -p clusteredNR
+cd clusteredNR
+
+for i in $(seq -w 0 49); do
+    wget -c "https://ftp.ncbi.nlm.nih.gov/blast/db/experimental/nr_cluster_seq.${i}.tar.gz"
+    wget -c "https://ftp.ncbi.nlm.nih.gov/blast/db/experimental/nr_cluster_seq.${i}.tar.gz.md5"
+done
+
+The -c option allows interrupted downloads to resume.
+
+8.3.3 Checking downloaded archive integrity
+
+for i in $(seq -w 0 49); do
+    md5sum -c "nr_cluster_seq.${i}.tar.gz.md5"
+done
+
+8.3.4 Extracting the database
+
+for i in $(seq -w 0 49); do
+    tar -xzf "nr_cluster_seq.${i}.tar.gz"
+done
+
+8.3.5 Inspecting the extracted database
+
+blastdbcmd -info -db nr_cluster_seq
+
+The database inspection reported 465,517,121 sequences and 148,632,845,539 residues, with database date 26 September 2025 and BLAST database version 5.
+
+8.3.6 Preparing the database for DIAMOND
+
+Each extracted database volume was prepared using diamond prepdb:
+for chunk in nr_cluster_seq.*.tar.gz; do
+    echo "Preparing DIAMOND DB for $chunk ..."
+    diamond prepdb -d "${chunk%.tar.gz}"
+done
+
+This command was recorded in the supplied terminal history. Retain the generated DIAMOND database files alongside the database manifest if storage permits.
+
+8.3.7 DIAMOND BLASTP search
+
+The supplied run searched the first query partition (Core_longest_seq_part1.fasta) against each of the 50 database volumes. The example below reproduces the recorded command structure:
+
+mkdir -p part1_results
+
+for db in nr_cluster_seq.{00..49}; do
+    echo "Running DIAMOND on $db ..."
+
+    diamond blastp \
+        -d "$db" \
+        -q /path/to/Core_longest_seq.fasta \
+        -o "part1_results/results_${db}.tsv" \
+        -e 1e-5 \
+        -f 6 qseqid sseqid pident length evalue bitscore stitle \
+        -p 48 \
+        --max-target-seqs 5
+done
+
+Output columns
+Column	Meaning
+qseqid	Query protein identifier
+sseqid	Subject protein identifier
+pident	Percentage sequence identity
+length	Alignment length
+evalue	Expectation value
+bitscore	Alignment bit score
+stitle	Subject sequence title
+
+
+8.4 Protein domain and conserved-motif annotation using InterProScan
+
+InterProScan (v5.75-106.0) was run in standalone mode on the representative protein sequences. The supplied example uses the soft-core category input, softcore_longest.fasta; the same workflow was reported for the other pangenome categories.
+
+8.4.1 Command
+
+/path/to/interproscan-5.75-106.0/interproscan.sh \
+    -i softcore_longest.fasta \
+    -appl Pfam,TIGRFAM,SMART,SUPERFAMILY,CDD,ProSiteProfiles,PANTHER,Gene3D,Hamap,PRINTS,PIRSR,PIRSF,SFLD \
+    -goterms \
+    -iprlookup \
+    -pa \
+    -cpu 8 \
+    -f tsv
+
+8.4.2 Parameters
+
+Parameter	Purpose / recorded setting
+-i	Input protein FASTA file
+-appl	Requested InterProScan analysis applications
+-goterms	Retrieve associated Gene Ontology terms
+-iprlookup	Retrieve InterPro identifiers
+-pa	Retrieve pathway annotations
+-cpu 8	Use 8 CPUs
+-f tsv	Write tab-separated output
+Output	InterProScan TSV result
+
+
+8.4.3 Analyses reported in the execution log
+
+The execution log recorded the following analysis versions:
+CDD-3.21
+Gene3D-4.3.0
+Hamap-2025_01
+NCBIfam-17.0
+PANTHER-19.0
+Pfam-37.4
+PIRSF-3.10
+PIRSR-2025_01
+PRINTS-42.0
+ProSiteProfiles-2025_01
+SFLD-4
+SMART-9.0
+SUPERFAMILY-1.75
+The log also reported that the installed InterProScan version was 5.75-106.0, whereas the available pre-calculated match lookup service was 5.76-107.0. Because the versions did not match, InterProScan disabled the lookup service and continued the analysis locally.
+
+
+8.5 UniProt Swiss-Prot annotation using DIAMOND
+
+8.5.1 Database preparation
+
+The UniProt Swiss-Prot FASTA database was downloaded as uniprot_sprot.fasta.gz and decompressed. The DIAMOND database was then created using DIAMOND v2.1.13.167.
+
+gunzip uniprot_sprot.fasta.gz
+
+diamond makedb \
+    --in uniprot_sprot.fasta \
+    -d swissprot
+
+The database preparation log reported:
+
+Parameter	Recorded value
+Database	UniProt Swiss-Prot
+Number of sequences	573,661
+Total residues	207,922,125
+DIAMOND version	2.1.13.167
+Database name	swissprot
+
+
+8.5.2 DIAMOND BLASTP search
+
+diamond blastp \
+    -q /path/to/pangenome_protein_seq_all.fasta \
+    -d swissprot \
+    -o swissprot_hits.tsv \
+    -f 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore \
+    --evalue 1e-5 \
+    --max-target-seqs 5 \
+    --sensitive \
+    --threads 40
+
+Output columns
+
+Column	Meaning
+qseqid	Query protein identifier
+sseqid	Swiss-Prot subject identifier
+pident	Percentage sequence identity
+length	Alignment length
+mismatch	Number of mismatches
+gapopen	Number of gap openings
+qstart, qend	Query alignment start and end
+sstart, send	Subject alignment start and end
+evalue	Expectation value
+bitscore	Alignment bit score
+
+
+The manuscript describes transferring GO terms only from matches meeting all of the following criteria:
+
+- E-value ≤ 1 × 10⁻⁵;
+- sequence identity ≥ 40%; and
+- query coverage ≥ 50%.
+
+It also describes restricting taxonomy-based annotation transfer to fungal-associated annotations.
+
+
+All DIAMOND hits obtained against the UniProt Swiss-Prot database were initially retained and used for UniProt accession (ID) mapping. The mapped accessions were subsequently subjected to taxonomy-based filtering using taxonomic identifier **4751 (Fungi)**. GO terms and associated functional annotation details were then retrieved from the filtered UniProt mappings, thereby restricting the transferred annotations to fungal-associated proteins.
+
+
+
+8.6 DeepFRI-based functional prediction
+
+DeepFRI was used to predict GO annotations from protein sequences. The supplied batch script processes every .fasta file in the input directory and runs the three GO ontologies: molecular function (mf), biological process (bp), and cellular component (cc).
+
+8.6.1 Batch script
+Save the following as run_all_deepfri.sh:
+#!/bin/bash
+
+# Input and output directories
+INPUT_DIR="input_sequences_for_annotation"
+OUTPUT_DIR="results_go_prediction"
+
+mkdir -p "$OUTPUT_DIR"
+
+# GO ontologies
+ONTOLOGIES=("mf" "bp" "cc")
+
+# Process every FASTA file in the input directory
+for fasta in "$INPUT_DIR"/*.fasta; do
+
+    # Obtain the input filename without its directory or extension
+    base=$(basename "$fasta" .fasta)
+
+    echo "=========================================="
+    echo "Processing ${base}"
+    echo "=========================================="
+
+    # Create a separate output directory for each input dataset
+    mkdir -p "$OUTPUT_DIR/$base"
+
+    # Run DeepFRI for each GO ontology
+    for ont in "${ONTOLOGIES[@]}"; do
+        echo "Running ontology: ${ont} on ${base}"
+
+        python predict.py \
+            --fasta_fn "$fasta" \
+            --ont "$ont" \
+            --output_fn_prefix "$OUTPUT_DIR/$base/DeepFRI_${ont}_${base}" \
+            --verbose
+    done
+
+    echo "Finished ${base}"
+done
+
+echo "All DeepFRI predictions completed."
+Make the script executable and run it from the DeepFRI installation directory:
+chmod +x run_all_deepfri.sh
+./run_all_deepfri.sh
+8.6.2 Input and output organization
+The input directory should contain the category-specific representative protein FASTA files, for example:
+input_sequences_for_annotation/
+├── core_longest.fasta
+├── softcore_longest.fasta
+├── shell_longest.fasta
+└── cloud_longest.fasta
+The script creates a separate output directory for each input FASTA and runs DeepFRI for all three GO ontologies:
+results_go_prediction/
+├── core_longest/
+├── softcore_longest/
+├── shell_longest/
+└── cloud_longest/
+
+DeepFRI version and confidence filtering: the supplied records do not identify the DeepFRI software/model release or provide the complete prediction output. The manuscript reports retaining GO predictions with confidence scores ≥ 0.5. This threshold must be applied to the prediction output in a documented post-processing step. The batch script above runs predictions but does not filter predictions by confidence. Archive the DeepFRI environment/package details, model files or model release, full logs, and confidence-filtering script.
+
+
+9. Gene Ontology (GO) annotation integration, statistics, and enrichment analysis
+
+9.1 Integration of GO annotations from multiple sources
+
+GO annotations obtained from UniProt Swiss-Prot, eggNOG-mapper, InterProScan, and DeepFRI were consolidated into a single non-redundant gene-level annotation table.
+Annotation source	Input file	Gene identifier column	GO-term column
+UniProt Swiss-Prot	SWISSPROT_GO_labeled.csv	Gene_ID	GO_IDs
+eggNOG-mapper	eggnog_go_labeled.csv	query	GOs
+InterProScan	InterPro_GO_labeled.csv	GeneID	GO_terms
+DeepFRI	DeepFRI_GO_labeled.csv	GeneID	GO_terms
+
+
+9.1.1 Python script for merging non-redundant GO annotations
+
+The script reads the four source-specific annotation tables, collects GO terms for each gene, removes duplicate GO identifiers using a Python set, and retains the corresponding pangenome gene class (Gene_Class).
+
+Save as merge_GO_annotations.py:
+
+import pandas as pd
+from collections import defaultdict
+
+# Input files and corresponding column names
+files = [
+    ("SWISSPROT_GO_labeled.csv", "Gene_ID", "GO_IDs"),
+    ("eggnog_go_labeled.csv", "query", "GOs"),
+    ("InterPro_GO_labeled.csv", "GeneID", "GO_terms"),
+    ("DeepFRI_GO_labeled.csv", "GeneID", "GO_terms")
+]
+
+# Containers for unique GO terms and gene classes
+go_dict = defaultdict(set)
+gene_class_dict = {}
+
+# Read and process each annotation source
+for file, gene_col, go_col in files:
+    df = pd.read_csv(file)
+
+    for _, row in df.iterrows():
+        gene = row[gene_col]
+        gene_class = row["Gene_Class"]
+        gene_class_dict[gene] = gene_class
+
+        # Split GO identifiers separated by commas or semicolons
+        if pd.notna(row[go_col]):
+            go_terms = row[go_col].replace(",", ";").split(";")
+            for go in go_terms:
+                go = go.strip()
+                if go.startswith("GO:"):
+                    go_dict[gene].add(go)
+
+# Build the merged gene-level GO table
+merged_data = []
+for gene, go_set in go_dict.items():
+    merged_data.append({
+        "Gene_ID": gene,
+        "GO_terms": ";".join(sorted(go_set)),
+        "Gene_Class": gene_class_dict.get(gene, "UNCLASSIFIED")
+    })
+
+merged_df = pd.DataFrame(merged_data)
+
+# Export the consolidated annotation table
+merged_df.to_csv("ALL_SOURCES_MERGED_GO.csv", index=False)
+
+print("GO annotations merged successfully!")
+print(f"Total genes: {merged_df.shape[0]}")
+
+Run:
+python merge_GO_annotations.py
+Output: ALL_SOURCES_MERGED_GO.csv
+
+The output contains one row per gene represented in the collected GO annotations. Unique GO identifiers are stored as a semicolon-separated list, together with the corresponding Gene_Class.
+
+The use of a set removes repeated GO identifiers assigned to the same gene across annotation sources. This removes duplicate identifiers from the integrated gene-level list; it does not collapse biologically related GO terms or GO parent–child relationships.
+
+9.2 Statistical summary of GO annotation
+
+After integrating the four annotation sources, an R script was used to summarize GO annotation coverage, overlap among annotation sources, and GO annotation distributions across pangenome gene classes.
+
+R script: GO_annotation_stats.R
+
+The supplied output-report section confirms the following outputs.
+9.2.1 Summary tables
+Output file	Description
+GO_annotation_summary_statistics.csv	Summary statistics for GO annotation
+GO_source_overlap_statistics.csv	Overlap statistics among annotation sources
+GO_statistics_by_gene_class.csv	GO annotation statistics by pangenome gene class
+Comprehensive_GO_Annotation_Data.csv	Comprehensive GO annotation dataset
+
+
+9.2.2 Visualization outputs
+The script generated 10 plots, each in PDF and PNG formats, with titles and without titles.
+
+Plots generated:
+1. Enhanced UpSet plot showing combinations of annotation sources.
+2. Venn diagram showing gene overlap among annotation sources.
+3. Bar plot showing genes annotated by different numbers of sources.
+4. Box plot showing GO-term counts by gene class.
+5. Box plot showing GO-term counts by annotation source.
+6. Stacked bar plot showing source coverage across gene classes.
+7. Bar plot showing annotation coverage.
+8. Heatmap showing annotation-source coverage across gene classes.
+9. Faceted box plot showing annotation distributions by source and gene class.
+10. Statistical comparison of mean, median, and maximum GO-term counts.
+Output directories:
+GO_Analysis_Plots/
+├── with_titles/
+└── without_titles/
+Each directory contains the corresponding 10 plots in PDF and PNG formats.
+
+9.2.3 Running the statistics analysis
+From the directory containing the script and its required input files:
+Rscript GO_annotation_stats.R
+The exact input filenames, statistical calculations, plotting parameters, and R package versions should be documented from the complete R script. The supplied output-report excerpt does not establish those implementation details.
+
+
+9.3 GO enrichment analysis
+
+9.3.1 Input files
+Input file	Purpose
+ALL_SOURCES_MERGED_GO_comined.csv	Integrated gene-level GO annotations from Swiss-Prot, eggNOG-mapper, InterProScan, and DeepFRI
+core_IDS.txt	Gene IDs assigned to the core category
+softcore_IDS.txt	Gene IDs assigned to the soft-core category
+shell_IDS.txt	Gene IDs assigned to the shell category
+cloud_IDS.txt	Gene IDs assigned to the cloud category
+
+
+The annotation table was expected to contain the columns Gene_ID and GO_terms. GO terms were stored as semicolon-separated identifiers. The gene universe was defined in the script as all unique gene IDs present in the merged GO annotation table. For each category, the target gene list was intersected with this universe before enrichment testing; therefore, category genes without entries in the merged GO annotation table were not included in the test.
+
+9.3.2 R script for GO enrichment
+
+Save the script as GO_enrichment_topGO.R:
+
+# Set working directory
+
+setwd("/home/naren/Desktop/ANAND/PAN_GENOME/GO_ENRICHMENT/GO_ENRICHMENT_JAN_2026")
+
+# Load required packages
+suppressPackageStartupMessages({
+  library(topGO)
+  library(GO.db)
+  library(tidyverse)
+})
+
+# Read the integrated GO annotation table
+go_df <- read.csv(
+  "ALL_SOURCES_MERGED_GO_comined.csv",
+  stringsAsFactors = FALSE
+)
+
+# Construct gene-to-GO mapping
+gene2go <- strsplit(go_df$GO_terms, ";")
+names(gene2go) <- go_df$Gene_ID
+
+# Define the annotated gene universe
+all_genes <- unique(go_df$Gene_ID)
+
+# Function to perform enrichment for one pangenome category
+run_GO_enrichment <- function(target_ids, category_name) {
+
+  cat(paste0("\nProcessing: ", category_name, "...\n"))
+
+  # Restrict target genes to genes represented in the annotation universe
+  target_ids <- intersect(target_ids, all_genes)
+
+  # Create binary gene-selection vector
+  gene_list <- factor(as.integer(all_genes %in% target_ids))
+  names(gene_list) <- all_genes
+
+  # Skip if the target set or non-target set is absent
+  if (length(levels(gene_list)) < 2) {
+    message("Skipping: No target genes found in annotation file.")
+    return(NULL)
+  }
+
+  # Create topGO object for Biological Process ontology
+  GOdata <- new(
+    "topGOdata",
+    ontology = "BP",
+    allGenes = gene_list,
+    annot = annFUN.gene2GO,
+    gene2GO = gene2go,
+    nodeSize = 1
+  )
+
+  # Perform Fisher's exact test using the classic algorithm
+  result <- runTest(
+    GOdata,
+    algorithm = "classic",
+    statistic = "fisher"
+  )
+
+  # Retrieve results for all tested GO terms
+  res_table <- GenTable(
+    GOdata,
+    Fisher_pvalue = result,
+    orderBy = "Fisher_pvalue",
+    topNodes = length(score(result))
+  )
+
+  # Convert formatted p-values (including values reported as < 1e-30) to numeric
+  res_table$Fisher_pvalue <- as.numeric(
+    gsub("[< ]", "", res_table$Fisher_pvalue)
+  )
+
+  # Retrieve GO term names
+  res_table$GO_Name <- Term(GOTERM[res_table$GO.ID])
+  res_table$GO_Name[is.na(res_table$GO_Name)] <-
+    res_table$GO.ID[is.na(res_table$GO_Name)]
+
+  # Adjust p-values using the Benjamini-Hochberg procedure
+  res_table$FDR <- p.adjust(
+    res_table$Fisher_pvalue,
+    method = "BH"
+  )
+
+  # Retain GO terms with FDR <= 0.05
+  sig_res <- res_table %>%
+    filter(FDR <= 0.05)
+
+  # Calculate fold enrichment for significant terms
+  sig_res <- sig_res %>%
+    mutate(
+      Expected = as.numeric(Expected),
+      Fold_Enrichment = Significant / Expected
+    )
+
+  # Do not write a result file or plot if no significant terms are detected
+  if (nrow(sig_res) == 0) {
+    message("No significant terms (FDR <= 0.05) found for ", category_name)
+    return(NULL)
+  }
+
+  # Write significant enrichment results
+  out_csv <- paste0(
+    "GO_enrichment_", category_name, "_FDR0.05.csv"
+  )
+  write.csv(sig_res, out_csv, row.names = FALSE)
+
+  # Select the 20 most significant terms for visualization
+  plot_df <- sig_res %>%
+    arrange(FDR) %>%
+    head(20) %>%
+    mutate(logFDR = -log10(FDR))
+
+  # Generate bar plot
+  p <- ggplot(
+    plot_df,
+    aes(x = reorder(GO_Name, logFDR), y = logFDR)
+  ) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    geom_text(
+      aes(label = paste0("n=", Significant)),
+      hjust = -0.1,
+      size = 3
+    ) +
+    coord_flip() +
+    theme_bw() +
+    labs(
+      title = paste("GO Enrichment (FDR <= 0.05):", category_name),
+      x = NULL,
+      y = "-log10(FDR)"
+    ) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.15))
+    )
+
+  ggsave(
+    filename = paste0(
+      "GO_enrichment_", category_name, "_FDR0.05.png"
+    ),
+    plot = p,
+    width = 10,
+    height = 7,
+    dpi = 300
+  )
+}
+
+# Read category-specific gene ID lists
+safe_scan <- function(file) {
+  if (file.exists(file)) {
+    return(scan(file, what = character(), quiet = TRUE))
+  }
+  warning(paste("File missing:", file))
+  return(character())
+}
+
+core_ids     <- safe_scan("core_IDS.txt")
+softcore_ids <- safe_scan("softcore_IDS.txt")
+shell_ids    <- safe_scan("shell_IDS.txt")
+cloud_ids    <- safe_scan("cloud_IDS.txt")
+
+# Report numbers of IDs read from each file
+cat("\nIDs Loaded:\n")
+cat("Core:", length(core_ids), "\n")
+cat("Softcore:", length(softcore_ids), "\n")
+cat("Shell:", length(shell_ids), "\n")
+cat("Cloud:", length(cloud_ids), "\n")
+
+# Run enrichment separately for each pangenome category
+run_GO_enrichment(core_ids, "CORE")
+run_GO_enrichment(softcore_ids, "SOFTCORE")
+run_GO_enrichment(shell_ids, "SHELL")
+run_GO_enrichment(cloud_ids, "CLOUD")
+
+cat("\nGO enrichment analysis finished.\n")
+Run the analysis from the directory containing the input files:
+Rscript GO_enrichment_topGO.R
+
+9.3.3 Statistical test and parameters
+
+Parameter	Setting used	Description
+R packages	topGO, GO.db, tidyverse	GO enrichment, GO term metadata, and data handling/plotting
+Ontology	BP	Biological Process ontology only
+Annotation function	annFUN.gene2GO	Supplies the gene-to-GO mapping constructed from the merged annotation table
+Gene universe	unique(go_df$Gene_ID)	All genes represented in the integrated GO annotation table
+Target gene sets	Core, soft-core, shell, cloud	Each category tested separately
+nodeSize	1	Minimum number of annotated genes required for a GO node to be retained by topGO
+Algorithm	classic	Tests each GO term without the graph-based decorrelation used by algorithms such as elim or weight01
+Test statistic	fisher	Fisher's exact test
+Multiple-testing correction	Benjamini-Hochberg (BH)	Applied to the p-values returned for the tested GO terms within each category
+Significance threshold	FDR <= 0.05	GO terms at or below this adjusted p-value were retained
+Fold enrichment	Significant / Expected	Observed number of target genes annotated to the term divided by the expected number
+Plot selection	Top 20 significant terms	Terms ordered by ascending FDR and plotted as -log10(FDR)
+
+
+9.3.4 Output files
+
+For each category with at least one significant GO term, the script generates a CSV file and a PNG bar plot:
+Category	Significant-results table	Enrichment plot
+Core	GO_enrichment_CORE_FDR0.05.csv	GO_enrichment_CORE_FDR0.05.png
+Soft-core	GO_enrichment_SOFTCORE_FDR0.05.csv	GO_enrichment_SOFTCORE_FDR0.05.png
+Shell	GO_enrichment_SHELL_FDR0.05.csv	GO_enrichment_SHELL_FDR0.05.png
+Cloud	GO_enrichment_CLOUD_FDR0.05.csv	GO_enrichment_CLOUD_FDR0.05.png
+
+
+The CSV files contain the significant GO terms, including their GO identifiers, term names, Fisher test p-values, FDR-adjusted p-values, observed significant-gene counts, expected counts, and calculated fold-enrichment values.
+
+
+
+
+
+
+
+10. Identification of CAZymes, PHI-base-associated proteins and candidate effectors
+
+This section documents the identification of carbohydrate-active enzymes (CAZymes), proteins with similarity to PHI-base entries, and candidate secreted effector proteins in the 19 Bipolaris sorokiniana proteomes. Analyses were performed on proteins assigned to the core, softcore, shell and cloud pangenome categories, where category-specific FASTA files were available.
+
+10.1. CAZyme identification using dbCAN3
+
+Method
+
+CAZymes were identified using dbCAN3 (accessed 4 November 2025). Protein sequences were evaluated using three complementary approaches:
+1. HMMER search against the dbCAN HMM database (E-value < 1 × 10⁻¹⁵; coverage > 0.35).
+2. DIAMOND search against the CAZy database (E-value < 1 × 10⁻¹⁰²).
+3. HMMER search against dbCAN-sub (E-value < 1 × 10⁻¹⁵; coverage > 0.35).
+
+A CAZyme family was retained as a high-confidence prediction when it was supported by at least two of the three methods.
+
+Reproducibility parameters
+
+Item	Setting reported in the study
+Tool	dbCAN3
+Access date	4 November 2025
+Search methods	HMMER/dbCAN, DIAMOND/CAZy, HMMER/dbCAN-sub
+dbCAN HMMER E-value	< 1 × 10⁻¹⁵
+dbCAN HMMER coverage	> 0.35
+CAZy DIAMOND E-value	< 1 × 10⁻¹⁰²
+dbCAN-sub HMMER E-value	< 1 × 10⁻¹⁵
+dbCAN-sub HMMER coverage	> 0.35
+Retention rule	Support from at least 2 of 3 methods
+
+
+Inputs and outputs
+
+- Input: predicted protein sequences for the B. sorokiniana strains / pangenome categories.
+- Output: dbCAN3 annotation results, including CAZyme family assignments from the three analysis methods and the combined high-confidence CAZyme calls.
+
+
+
+
+
+10.2. PHI-base similarity search and reciprocal best-hit analysis
+
+10.2.1. Reference database and input proteomes
+
+Protein sequences from the four pangenome categories (core.fasta, softcore.fasta, shell.fasta and cloud.fasta) were used as the query set. The pipeline log reports 257,142 B. sorokiniana proteins from 19 strains. The PHI-base reference FASTA was phi-base_current.fas, containing 9,676 protein sequences in the reported run. The DIAMOND version recorded in the terminal output was v2.1.12.166.
+
+The strain-specific proteomes used for the reciprocal searches were stored under phi_rbh_analysis/strain_proteomes/; strain-specific DIAMOND databases were stored under phi_rbh_analysis/diamond_databases/.
+
+10.2.2. Forward PHI-base search and filtering
+
+The forward search compared the B. sorokiniana proteins against PHI-base. The filtering criteria specified in the pipeline were:
+- sequence identity ≥ 40%;
+- E-value ≤ 1 × 10⁻⁵;
+- query coverage ≥ 40%;
+- subject coverage ≥ 40%.
+For each B. sorokiniana query protein, the highest-bitscore hit among the qualifying PHI-base matches was selected. A stricter coverage analysis was also performed using query and subject coverage thresholds of 50% each. The script configuration specified a maximum of 50 PHI-base targets per query and 8 threads.
+
+The DIAMOND tabular fields specified in the pipeline were:
+
+qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore
+
+The first-stage script was named run_phi_rbh_pipeline.py. The available execution log confirms that it read the four category FASTA files, loaded 257,142 proteins across 19 strains, loaded 9,676 PHI-base proteins, and began building the PHI-base and strain-specific DIAMOND databases.
+
+
+
+10.2.3. Coverage calculation, filtering and best-hit selection
+
+The subsequent script, RUN_RBH_ANNALYSIS.PY, was run from the phi_rbh_analysis directory. It reads the existing forward-search table:
+forward_search/forward_all_alignments.tsv
+It also reads the strain-specific proteomes and PHI-base reference FASTA to calculate coverage from the alignment coordinates and full protein lengths. Coverage is calculated as:
+coverage (%) = (abs(end − start) + 1) / full protein length × 100
+The script writes the coverage-annotated forward table and, for both the 40%/40% and 50%/50% coverage thresholds, retains qualifying hits and selects the highest-bitscore qualifying hit for each query protein.
+
+10.2.4. Reciprocal best-hit searches
+For each strain, the PHI-base proteins selected from the forward best-hit results were extracted into a strain-specific reverse-query FASTA file. These PHI-base sequences were searched against the corresponding strain-specific B. sorokiniana DIAMOND database.
+
+The reverse-search command constructed by RUN_RBH_ANNALYSIS.PY is equivalent to:
+diamond blastp \
+  --query <strain>_PHI_queries.fasta \
+  --db <strain>_db \
+  --out <strain>_reverse_hits.tsv \
+  --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore \
+  --evalue 1e-5 \
+  --max-target-seqs 1 \
+  --sensitive \
+  --threads 8
+Here, <strain> represents one of the 19 strain identifiers. The reverse search requests one best target per PHI-base query. The script then checks whether this reverse best hit is the original B. sorokiniana query protein and whether the reverse alignment meets the corresponding identity, E-value and coverage criteria.
+10.2.5. Classification and output files
+A match was classified as RBH_SUPPORTED_CANDIDATE_ORTHOLOGUE when the reverse best hit returned the original B. sorokiniana query and passed the reciprocal filtering criteria. Qualifying forward homologues that did not meet this condition were retained as PHI_BASE_HOMOLOGUE_NON_RBH. Queries without a reverse hit were recorded separately as NO_REVERSE_HIT.
+
+The script produces the following principal outputs:
+Output	Description
+forward_all_hits_with_coverage.tsv	Forward alignments with calculated query and subject coverage
+forward_passing_40_40.tsv	All forward matches passing 40% query and subject coverage
+forward_best_40_40.tsv	Highest-bitscore qualifying forward hit per query at 40%/40% coverage
+forward_passing_50_50.tsv	All forward matches passing 50% query and subject coverage
+forward_best_50_50.tsv	Highest-bitscore qualifying forward hit per query at 50%/50% coverage
+<strain>_PHI_queries.fasta	PHI-base sequences selected for a strain-specific reverse search
+<strain>_reverse_hits.tsv	Reverse-search results for each strain
+PHI_RBH_results_40_40.tsv	Final classifications at 40%/40% coverage
+PHI_RBH_results_50_50.tsv	Final classifications at 50%/50% coverage
+PHI_RBH_summary.tsv	Summary counts of best forward hits and RBH-supported pairs
+
+
+The analysis retained non-RBH homologues rather than treating failure to satisfy RBH as proof that a match was not biologically relevant. RBH was interpreted as supporting evidence for candidate orthology, not definitive proof of orthology or conserved phenotype.
+10.2.6. Important reproducibility checks
+1. The complete run_phi_rbh_pipeline.py file and the actual forward_all_alignments.tsv should be deposited with the analysis scripts/data. The currently available copy does not show the complete forward-search command.
+2. The recovery/RBH script sets BASE = Path.cwd() and expects to be run from the phi analysis directory containing forward_search/, strain_proteomes/ and diamond_databases/. Its PHI FASTA path is BASE.parent / "phi-base_current.fas"; confirm that the actual directory layout matches this relative path.
+3. The script's get_strain() function extracts the strain as the part of the gene identifier before the first underscore, after the | separator. This assumes the protein identifiers follow the format shown in the input FASTA, for example OG0000002|BRIP10943a_02345.
+4. The reverse-search script uses --max-target-seqs 1; the forward-search script's full DIAMOND options should be checked from the complete script before final publication.
+5. The 50%/50% coverage analysis is a stricter coverage sensitivity analysis; the sequence identity and E-value cut-offs remain 40% and 1 × 10⁻⁵, respectively.
+
+
+
+10.3. Secreted protein and candidate effector prediction
+
+10.3.1. Signal peptide prediction using SignalP 6.0
+
+All predicted proteins were screened for N-terminal signal peptides using SignalP 6.0 in eukaryotic mode. The terminal help output identifies the installed command as signalp6. The four pangenome-category runs used the fast model and tabular text output:
+# Core
+signalp6 --fastafile Core_sequences_clean.fasta \
+  --output_dir Core_signalp6_out \
+  --format txt \
+  --organism eukarya \
+  --mode fast
+
+# Softcore
+signalp6 --fastafile Softcore_sequences_clean.fasta \
+  --output_dir Softcore_signalp6_out \
+  --format txt \
+  --organism eukarya \
+  --mode fast
+
+# Shell
+signalp6 --fastafile Shell_sequences_clean.fasta \
+  --output_dir Shell_signalp6_out \
+  --format txt \
+  --organism eukarya \
+  --mode fast
+
+# Cloud
+signalp6 --fastafile Cloud_sequences_clean.fasta \
+  --output_dir Cloud_signalp6_out \
+  --format txt \
+  --organism eukarya \
+  --mode fast
+
+  Parameter	Meaning / setting
+--fastafile	Input protein FASTA file
+--output_dir	Directory for SignalP output
+--format txt	Tabular text output
+--organism eukarya	Eukaryotic organism group; limits prediction to Sec/SPI according to the program help
+--mode fast	Fast prediction model
+
+
+The exact SignalP 6.0 patch/build version and the criteria used to extract signal-peptide-positive sequences into the subsequent FASTA files were not included in the log. Record these from the environment and extraction script if available.
+10.3.2. TargetP 2.0 filtering
+
+SignalP-positive proteins were subsequently evaluated using TargetP 2.0 in non-plant mode to distinguish secretory signal peptides from mitochondrial targeting peptides. The command records show the following category-specific runs:
+
+# CORE
+/path/to/targetp-2.0/bin/targetp \
+  -fasta CORE_SIGNAL_PEPTIDES.fasta \
+  -org non-pl \
+  -format short \
+  -prefix CLOUD_TargetP_results
+
+Similarly run for shell, softcore and cloud
+
+
+10.3.3. Subcellular localization using DeepLoc 2.1
+The proteins carrying signal peptides were analyzed using DeepLoc 2.1 with the Accurate model. The  run used a combined input file containing 19,556 signal-peptide-positive proteins and selected CUDA as the execution device:
+
+deeploc2 \
+  -f 19556_SIGNAL_PEPTIDES.fasta \
+  -o deeploc_gpu \
+  --device cuda \
+  --model Accurate
+Parameter	Setting
+-f	FASTA file of 19,556 signal-peptide-positive proteins
+-o	deeploc_gpu output directory
+--device	cuda
+--model	Accurate
+
+
+For the high-confidence secretome, the selection criteria were: extracellular localization, presence of a signal peptide, and classification as a soluble (non-membrane) protein.
+
+
+10.3.4. Effector prediction using EffectorP 3.0
+The extracellular, signal-peptide-containing, soluble proteins were analyzed using EffectorP 3.0 in fungal mode. The recorded core command was:
+
+python3 EffectorP.py -f -i /path/to/softcore_selected.fasta -o /path/to/softcore_effector_fungal.txt
+python3 EffectorP.py -f -i /path/to/shell_selected.fasta    -o /path/to/shell_effector_fungal.txt
+python3 EffectorP.py -f -i /path/to/cloud_selected.fasta    -o /path/to/cloud_effector_fungal.txt
+python3 EffectorP.py -f -i /path/to/core_selected.fasta    -o /path/to/core_effector_fungal.txt
+
+
+10.4. Software, versions and parameters to report
+
+Analysis	Software / version supported by supplied records	Key settings
+
+CAZyme annotation	dbCAN3; accessed 4 Nov 2025	Three-method evidence; two-of-three support rule; thresholds in Section 10.1
+PHI-base similarity and RBH	DIAMOND v2.1.12.166	Identity ≥40%; E-value ≤1e-5; query and subject coverage ≥40%; stricter 50%/50% coverage analysis; 8 threads in the supplied scripts
+Signal peptide prediction	SignalP 6.0	Eukaryotic mode; fast model; text output
+Targeting peptide classification	TargetP 2.0	Non-plant mode; short output format
+Subcellular localization	DeepLoc 2.1	Accurate model; CUDA device in the logged run
+Effector prediction	EffectorP 3.0	Fungal mode (-f); ensemble classification in the logged run
+
+
+
+
+11. Biosynthetic Gene Cluster (BGC) Prediction and Similarity Network Analysis
+
+11.1. antiSMASH-based prediction of biosynthetic gene clusters
+
+Biosynthetic gene clusters (BGCs) were predicted from the genome assemblies and corresponding gene annotation (GFF) files of the 19 Bipolaris sorokiniana strains using the fungal version of antiSMASH v8.0.4. antiSMASH was run through the web server. The fungal mode was selected, and detection strictness was set to relaxed to enable sensitive identification of canonical and atypical secondary-metabolite clusters.
+Item	Setting
+Tool	antiSMASH v8.0.4
+Execution platform	antiSMASH web server
+Organism mode	Fungal
+Detection strictness	Relaxed
+Inputs	Genome assembly and corresponding GFF file for each strain
+Number of strains	19
+Output used downstream	antiSMASH GenBank (.gbk) records
+
+11.2. BiG-SCAPE clustering and BGC similarity networks
+
+The antiSMASH GenBank files from the 19 strains were analyzed using BiG-SCAPE v2.0.0 to group related BGC regions into gene cluster families (GCFs) and construct BGC similarity networks. Domain annotation used the Pfam-A HMM database (release dated 28 May 2025).
+
+The supplied command was:
+bigscape cluster \
+  -i ~/Desktop/ANAND/PAN_GENOME/ANTISMASH/BIGSCAPE_INPUT/ \
+  -o ~/Desktop/ANAND/PAN_GENOME/ANTISMASH/BIGSCAPE_OUTPUT/ \
+  --include-singletons \
+  --hybrids-off \
+  --gcf-cutoffs 0.4 \
+  --include-gbk '*' \
+  --cores 4 \
+  -p Pfam-A.hmm
+
+Parameter descriptions
+Parameter	Description
+cluster	Runs BiG-SCAPE clustering and network generation.
+-i	Directory containing antiSMASH GenBank input files.
+-o	Output directory for BiG-SCAPE results.
+--include-singletons	Retains BGCs that do not cluster with other records as singleton GCFs.
+--hybrids-off	Disables hybrid-cluster duplication across biosynthetic classes.
+--gcf-cutoffs 0.4	Sets the GCF clustering distance cutoff to 0.4.
+--include-gbk '*'	Includes GenBank files matching the supplied pattern.
+--cores 4	Uses four CPU cores.
+-p Pfam-A.hmm	Supplies the Pfam-A HMM profile database for domain annotation.
+
+
+
+
+12. CAFE : Gene-family evolution analysis using CAFE5
+
+Step 1. Prepare the gene-family count matrix
+Input: OrthoFinder gene-count matrix, Orthogroups.GeneCount.tsv.
+
+The CAFE5 input must contain one row per orthogroup and one column per strain, in tab-delimited format. The first column should identify the gene family.
+
+Final CAFE5 input filename was:
+gene_families.cafe.tsv
+
+
+Step 2. Prepare the species tree
+Input: OrthoFinder species tree.
+
+The manuscript describes the following operations:
+1. Obtain the species tree from OrthoFinder.
+2. Midpoint-root the tree.
+3. Convert it to an ultrametric tree using chronos() from ape v5.7-1.
+4. Use the resulting tree for CAFE5.
+The exact original command used to midpoint-root and ultrametricise the 19-strain tree was not included in your logs. The following is a reproducible R implementation of the described procedure.
+
+library(ape)
+
+# Input OrthoFinder species tree
+tree <- read.tree("SpeciesTree_rooted_node_labels.txt")
+
+# Midpoint rooting
+tree_midpoint <- midpoint.root(tree)
+
+# Convert to an ultrametric tree using penalized likelihood
+tree_ultrametric <- chronos(tree_midpoint)
+
+# Check tree
+cat("Number of strains:", Ntip(tree_ultrametric), "\n")
+cat("Rooted:", is.rooted(tree_ultrametric), "\n")
+cat("Ultrametric:", is.ultrametric(tree_ultrametric), "\n")
+
+# Save ultrametric tree
+write.tree(
+    tree_ultrametric,
+    file = "SpeciesTree_rooted_ultra.txt"
+)
+
+Run:
+Rscript prepare_ultrametric_tree.R
+
+output:
+SpeciesTree_rooted_ultra.txt
+
+Step 3. Estimate the CAFE5 gene-family error model
+The gene-family error model was estimated separately and then supplied to the subsequent CAFE5 analysis.
+
+/home/naren/Desktop/ANAND/PAN_GENOME/CAFE/CAFE5/bin/cafe5 \
+    -i gene_families.cafe.tsv \
+    -t SpeciesTree_rooted_ultra_clock.txt \
+    -e \
+     p \
+    -o 00_ERROR_MODEL
+
+
+Step 4. Run the main 19-strain CAFE5 analysis using the error model
+
+nohup /home/naren/Desktop/ANAND/PAN_GENOME/CAFE/CAFE5/bin/cafe5 \
+    -i gene_families.cafe.tsv \
+    -t SpeciesTree_rooted_ultra_clock.txt \
+    -e00_ERROR_MODEL/Base_error_model.txt \
+    -k 3 \
+    -p \
+    -I 1000 \
+    -P 0.01 \
+    -c 32 \
+    -o 01_CAFE_ERROR_MODEL_K3_I1000_P01 \
+    > 01_CAFE_ERROR_MODEL_K3_I1000_P01.log 2>&1 &
+
+This command uses:
+Parameter	Description
+-i	Gene-family count matrix.
+-t	Rooted ultrametric species tree.
+-e00_ERROR_MODEL/Base_error_model.txt	Previously estimated gene-family error model.
+-k 3	Three gamma rate categories.
+-p	Poisson root-family-size distribution.
+-I 1000	Maximum 1,000 optimizer iterations.
+-P 0.01	Significance threshold of 0.01.
+-c 32	32 CPU cores.
+-o	Output directory.
+nohup	Allows the process to continue after the terminal session is closed.
+
+
+
+Step 5. Perform the 16-strain sensitivity analysis
+To evaluate the effect of assembly fragmentation, you excluded the three most fragmented assemblies:
+D2
+SI
+BS52
+
+The sensitivity analysis therefore retained 16 strains.
+
+5.1 Remove the three strains from the species tree
+
+library(ape)
+
+# Original 19-strain ultrametric tree
+tree <- read.tree("SpeciesTree_rooted_ultra.txt")
+
+# Strains to remove
+remove_taxa <- c("D2", "SI", "BS52")
+
+# Confirm that all three strains are present
+missing <- setdiff(remove_taxa, tree$tip.label)
+
+if (length(missing) > 0) {
+    stop(
+        paste(
+            "Taxa not found:",
+            paste(missing, collapse = ", ")
+        )
+    )
+}
+
+# Remove the three strains
+tree_16 <- drop.tip(tree, remove_taxa)
+
+# Validate the pruned tree
+cat("Remaining strains:", Ntip(tree_16), "\n")
+cat("Rooted:", is.rooted(tree_16), "\n")
+cat("Ultrametric:", is.ultrametric(tree_16), "\n")
+
+# Save the 16-strain tree
+write.tree(
+    tree_16,
+    file = "SpeciesTree_rooted_ultra_16strain.txt"
+)
+
+Run:
+Rscript prune_species_tree_16strain.R
+
+Your supplied output confirmed:
+Original taxa: 19
+Removing: D2, SI, BS52
+Remaining taxa: 16
+Ultrametric: TRUE
+Rooted: TRUE
+
+Tree written to: SpeciesTree_rooted_ultra_16strain.txt
+
+Also validated the tree using:
+
+library(ape)
+
+tree <- read.tree("SpeciesTree_rooted_ultra_16strain.txt")
+
+tips <- seq_len(Ntip(tree))
+root_to_tip <- node.depth.edgelength(tree)[tips]
+
+cat("Number of tips:", Ntip(tree), "\n")
+cat("Rooted:", is.rooted(tree), "\n")
+cat("Binary:", is.binary(tree), "\n")
+cat("Ultrametric:", is.ultrametric(tree, tol = 1e-8), "\n")
+
+print(data.frame(
+    Strain = tree$tip.label,
+    Root_to_tip = root_to_tip
+))
+
+cat("Minimum:", min(root_to_tip), "\n")
+cat("Maximum:", max(root_to_tip), "\n")
+cat("Difference:", max(root_to_tip) - min(root_to_tip), "\n")
+
+Your validation reported:
+Number of tips: 16
+Rooted: TRUE
+Binary: TRUE
+Ultrametric: TRUE
+
+Minimum: 1
+Maximum: 1
+Difference: 1.500001e-10
+
+5.2 Prepare the 16-strain gene-family count matrix
+
+The 16-strain matrix must also exclude the columns corresponding to D2, SI and BS52.
+
+Input:
+gene_families.cafe.tsv
+
+Output:
+gene_families_16strain.cafe.tsv
+
+
+
+
+# Read the original CAFE5 gene-family matrix
+gene_families <- read.delim(
+    "gene_families.cafe.tsv",
+    header = TRUE,
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+)
+
+# Strains excluded from sensitivity analysis
+remove_strains <- c("D2", "SI", "BS52")
+
+# Check that the requested columns exist
+missing <- setdiff(remove_strains, colnames(gene_families))
+
+if (length(missing) > 0) {
+    stop(
+        paste(
+            "Missing strain columns:",
+            paste(missing, collapse = ", ")
+        )
+    )
+}
+
+# Retain all columns except the three excluded strains
+gene_families_16 <- gene_families[
+    ,
+    !colnames(gene_families) %in% remove_strains,
+    drop = FALSE
+]
+
+# Save the reduced matrix
+write.table(
+    gene_families_16,
+    file = "gene_families_16strain.cafe.tsv",
+    sep = "\t",
+    quote = FALSE,
+    row.names = FALSE
+)
+
+cat("Original columns:", ncol(gene_families), "\n")
+cat("Reduced columns:", ncol(gene_families_16), "\n")
+
+Run:
+Rscript prepare_16strain_gene_families.R
+
+Check the resulting header:
+head -n 1 gene_families_16strain.cafe.tsv
+
+
+
+5.3 Run CAFE5 on the 16-strain dataset
+Your supplied 16-strain command was:
+nohup /home/naren/Desktop/ANAND/PAN_GENOME/CAFE/CAFE5/bin/cafe5 \
+    -i gene_families.cafe.tsv \
+    -t SpeciesTree_rooted_ultra_16strain.txt \
+    -o cafe_results_k3_I1000_P01 \
+    -k 3 \
+    --cores 50 \
+    -p \
+    -I 1000 \
+    -P 0.01 \
+    > cafe_results_k3_I1000_P01/cafe_run.log 2>&1 &
+
+
+
+For the final comparison, extract these values from the completed CAFE5 output:
+- Optimised lambda value.
+- Final log-likelihood.
+- Number of significantly expanded orthogroups.
+- Number of significantly contracted orthogroups.
+- Total number of significantly changing orthogroups.
+
+
+Step 7. Functional annotation of significant orthogroups
+After identifying significant orthogroups, annotate them using the functional annotation resources:
+1. eggNOG annotations.
+2. CAZyme classifications.
+3. PHI-base annotations.
+
+
+
+13. Selection pressure analysis of conserved orthogroups
+
+Step 1. Identification of conserved orthogroups
+
+Single-copy orthogroups were filtered using the OrthoFinder gene-count matrix (Orthogroups.GeneCount.tsv). Orthogroups present in all 19 strains and having a single-copy gene in at least 70% of the strains were retained.
+
+Script: ORTHOGROUP_70_PERCENT_FILTER.py
+
+python3 /home/naren/Desktop/ANAND/PAN_GENOME/SELECTION_PRESSURE/1_SCO_PROTEIN_SEQUENCES_8396/ORTHOGROUP_70_PERCENT_FILTER.py
+
+Key parameters:
+
+Presence in all 19 strains.
+
+Single-copy threshold: ≥70% (at least 14 strains).
+
+Input: Orthogroups.GeneCount.tsv.
+
+Output: Orthogroups_filtered_70pct_singlecopy.tsv.
+
+The filtering procedure yielded 10,093 orthogroups for downstream analysis.
+
+Step 2. Protein sequence alignment
+
+Protein sequences were aligned using MUSCLE v5 in high-accuracy default mode.
+
+muscle -align OG_PROTEIN.fa -output OG_PROTEIN_aa_aln.fa
+
+Batch script: muscle_alignment.sh
+
+Output directory: aligned_PROTEIN_10093/
+
+Step 3. Codon alignment using PAL2NAL
+
+Protein alignments were converted into codon-aware nucleotide alignments using PAL2NAL v14.1 and the universal genetic code (codon table 1).
+
+With gap removal:
+
+perl PAL2NAL/pal2nal.pl \
+    aligned_PROTEIN_aa_aln.fa \
+    OG_CDS.fa \
+    -output fasta \
+    -nogap \
+    -codontable 1 \
+    > OG_codon_aln.fasta
+
+Without gap removal:
+
+perl PAL2NAL/pal2nal.pl \
+    aligned_PROTEIN_aa_aln.fa \
+    OG_CDS.fa \
+    -output fasta \
+    -codontable 1 \
+    > OG_codon_aln.fasta
+
+Python batch scripts processed the orthogroups and recorded missing CDS files and failed alignments in pal2nal_run_log.txt.
+pal2nal_alignment_with_gap_removal.py
+pal2nal_alignment_without_gap_removal_option.py
+
+
+Output directories:
+
+codon_aligned_output_with_gap_removal_option/
+
+codon_aligned_output_without_no_gap_option/
+
+Step 4. Alignment-length comparison
+
+A Python script using Biopython compared alignment lengths before and after gap removal. gap_calculation.py
+
+Input directories: the two PAL2NAL output directories.
+
+Output:
+
+alignment_length_comparison.csv
+
+The report contained orthogroup ID, alignment lengths with and without gap removal, and calculated gap percentage.
+
+Step 5. Codon alignment quality control
+
+Alignments were assessed for codon retention, ambiguous nucleotides and sequence quality. Alignments retaining ≥50% of the original codon positions were retained. Poor-quality alignments were subjected to iterative sequence removal while maintaining at least 13 sequences.
+
+Following quality control, 9,520 codon alignments were retained.
+
+Note: The exact scripts implementing iterative sequence removal, ambiguous nucleotide filtering and the ≥50% codon-retention criterion should also be included in the GitHub repository.
+
+Step 6. Phylogenetic reconstruction using IQ-TREE
+
+Gene-specific phylogenies were reconstructed using IQ-TREE v3.0.1 with codon data.
+
+For alignments with sufficient variation:
+
+iqtree3 \
+    -s OG_codon_aln.fasta \
+    -st CODON \
+    -m MFP \
+    -merit AICc \
+    -bnni \
+    -T AUTO \
+    -pre OG
+
+For low-variation alignments:
+
+iqtree3 \
+    -s OG_codon_aln.fasta \
+    -st CODON \
+    -m GY \
+    -safe \
+    -T AUTO \
+    -pre OG
+
+Model selection was performed using ModelFinder with AICc-based selection. Low-variation alignments were analysed using the Goldman–Yang (GY) codon model.
+
+for batch run : iqtree.sh
+
+Step 7. Selection analysis using HyPhy
+
+Four complementary selection analyses were performed for each retained orthogroup:
+
+hyphy busted \
+    --alignment OG.fasta \
+    --tree OG.tree \
+    --output OG_BUSTED.json
+
+hyphy meme \
+    --alignment OG.fasta \
+    --tree OG.tree \
+    --output OG_MEME.json
+
+hyphy fel \
+    --alignment OG.fasta \
+    --tree OG.tree \
+    --output OG_FEL.json
+
+hyphy absrel \
+    --alignment OG.fasta \
+    --tree OG.tree \
+    --output OG_aBSREL.json
+
+The analyses were executed using a batch shell script with: hyphy_all.sh
+
+8 parallel jobs.
+
+10 threads per job.
+
+OMP_NUM_THREADS=10.
+
+Output files included method-specific JSON results and log files.
+
+
+Step 8. Recombination sensitivity analysis using PhiPack
+
+The Strong Positive Selection orthogroups were evaluated using PhiPack, applying three recombination tests: PHI, NSS and MaxChi², with 1,000 permutations.
+
+The batch script was executed as follows:
+
+chmod +x run_phipack_all.sh
+./run_phipack_all.sh
+
+The underlying command for each orthogroup was:
+
+Phi \
+    -f OG.fasta \
+    -p 1000 \
+    -o
+
+The script used GNU Parallel with four simultaneous jobs. Individual results and logs were saved in orthogroup-specific directories as OG_PhiPack.log, with completion markers (OG_PhiPack.done).
+
+Of the 490 Strong Positive Selection orthogroups, 459 were reported as testable based on informative-site availability. PHI, NSS and MaxChi² results were evaluated, with BH-FDR correction applied to their P-values. PHI-supported evidence was considered significant at BH-FDR <0.05.
+
+Recombination-associated signals were treated as potential confounding evidence rather than definitive proof of recombination.
+
+
+
+14. Genome compartmentalization
+
+Analysis included
+1. Parses LK93_clean.gff3 and extracts gene coordinates and IDs.
+2. Orders genes by chromosomal position.
+3. Calculates 5′ and 3′ flanking intergenic region (FIR) lengths, accounting for gene strand.
+4. Excludes chromosome-terminal genes, genes without both neighbours, and overlapping loci.
+5. Compares each functional category against all other retained genes using two-sided Wilcoxon rank-sum tests.
+6. Applies Benjamini–Hochberg correction across the ten comparisons (five categories × two FIR directions).
+7. Generates log₁₀-transformed hexbin plots.
+Required input structure
+Place the following files in your RUN directory:
+RUN/
+├── LK93_clean.gff3
+└── categories/
+    ├── effector_gene_ids.txt
+    ├── CAZyme_gene_ids.txt
+    ├── PHI_gene_ids.txt
+    ├── positively_selected_gene_ids.txt
+    └── CAFE_expanded_contracted_gene_ids.txt
+
+Script: genome_compartmentalization.R
+
+Each category file should contain one gene ID per line, matching the gene IDs extracted from the GFF3.
+Important points to verify
+- The script currently assumes that the GFF3 gene identifier is stored in the ID attribute. Change GENE_ID_ATTRIBUTE if your GFF3 uses another attribute.
+- The script calculates FIRs in transcriptional orientation, so 5′ and 3′ are reversed for genes on the minus strand.
+- The hexbin plots use log10(FIR + 1) to retain genes with zero-length intergenic regions.
+- The original plotting code was not included in the material you supplied, so the panel arrangement and styling here are newly configured rather than guaranteed to reproduce your previous figure.
+Output files
+All results are saved under results/:
+Output	Description
+LK93_gene_FIR_values.tsv	FIR values for retained genes
+LK93_FIR_statistical_tests.tsv	Wilcoxon statistics and BH-adjusted P-values
+LK93_FIR_category_summary.tsv	Category-wise gene counts and median FIRs
+LK93_FIR_hexbin_panels.png	600-dpi figure
+LK93_FIR_hexbin_panels.pdf	PDF figure
+
+
+15. Protein–protein interaction (PPI) network analysis
+
+15.1 STRING interaction data and filtering
+
+The complete Bipolaris sorokiniana D2 proteome was queried against STRING v12.0 (organism identifier STRG0A63ZQP; accessed 30 April 2026). The downloaded detailed interaction file was:
+
+STRG0A63ZQP.protein.links.detailed.v12.0.txt
+
+The STRING dataset contained 2,313,410 protein interaction pairs. Interactions were mapped to the D2 protein identifiers and associated OrthoFinder orthogroups. For the core-pangenome network, retain interactions for which both endpoint proteins belong to core orthogroups. The resulting core interaction set contained 224,198 unique orthogroup-level interaction pairs involving 6,539 orthogroups/protein nodes. Apply a medium-confidence STRING combined-score threshold of 400; 224,198 interactions were retained and 889,063 lower-confidence pairs were excluded from the 1,113,261-pair core-filtered set.
+
+
+15.2 R analysis environment and input files
+
+Use PPI.R
+
+The network analysis was performed in R using igraph v2.3.2. The supplied script loads the following packages:
+- igraph
+- dplyr
+- ggplot2
+- readr
+- stringr
+- RColorBrewer
+- viridis
+- corrplot
+- scales
+- ggraph
+- tidygraph
+
+Input files expected by the supplied R script:
+
+File	Description
+interactions_medium_confidence.csv	Filtered network edge list
+nodes_annotated.csv	Node identifiers and functional annotations
+
+
+The script creates output/ subdirectories for CSV tables, figures, annotation-specific networks and top-ranked subnetworks.
+
+15.3 Network construction and topology
+
+The PPI network was represented as an undirected weighted graph. The final network contained 6,539 nodes and 224,198 edges. The giant connected component contained 6,450 nodes and 224,128 edges; isolated nodes and smaller disconnected components were excluded from downstream topological analyses.
+
+The following global properties were calculated using igraph:
+- number of vertices and edges;
+- edge density;
+- mean degree;
+- mean local clustering coefficient;
+- average shortest-path length; and
+- graph diameter.
+The supplied script records these values in output/csv_files/network_statistics_summary.csv.
+
+15.4 Centrality and composite prioritisation
+
+Six node-level measures were calculated:
+1. Degree centrality;
+2. Betweenness centrality;
+3. PageRank;
+4. Eigenvector centrality;
+5. Closeness centrality; and
+6. Local clustering coefficient.
+
+Individual metric values were rank-normalised and averaged to obtain a composite topological prioritisation score. Nodes were ranked by this composite score. The top 10% were selected for Louvain community detection, and the top 1% were designated as global hubs.
+
+The supplied script reports centrality correlations in output/csv_files/centrality_correlations.csv and the complete centrality table as whole_network_centrality_complete.csv.
+
+
+15.5 Community detection and functional annotation overlays
+Louvain community detection was applied to the top-10%-ranked node subnetwork. Accordingly, the resulting modules represent hub-enriched network communities, not a complete community decomposition of the entire PPI network.
+
+Functional annotations were overlaid to identify proteins associated with:
+- CAZymes;
+- predicted effectors;
+- PHI-base homologues;
+- CAFE-associated gene-family expansion/contraction; and
+- positively selected orthogroups.
